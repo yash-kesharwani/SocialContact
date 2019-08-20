@@ -24,6 +24,7 @@ public class ConnectionContextListener implements ServletContextListener {
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			//Some change
 		}
     }
 
