@@ -30,8 +30,10 @@ public class ConnectionContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent ctx) 
     { 
-    	String driver=ctx.getServletContext().getInitParameter("driver");	
-		String url=ctx.getServletContext().getInitParameter("url");
+//    	String driver=ctx.getServletContext().getInitParameter("driver");	
+//		String url=ctx.getServletContext().getInitParameter("url");
+    	String url="jdbc:derby:C:\\Users\\Fiona\\Documents\\workspace-sts-3.9.9.RELEASE\\derby\\mydb";
+    	String driver="org.apache.derby.jdbc.EmbeddedDriver";
 		try
 		{
 			Class.forName(driver);

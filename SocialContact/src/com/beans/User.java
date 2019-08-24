@@ -46,6 +46,24 @@ public class User
 		this.contactList = contactList;
 		this.credential=credential;
 	}
+	
+	public User(int userId, String fullName, String email, long phone, char gender, Date dob, Address userAddress,
+			String company, String picture, int status, int blockCount, Date lastActive) {
+		super();
+		this.userId = userId;
+		this.fullName = fullName;
+		this.email = email;
+		this.phone = phone;
+		this.gender = gender;
+		this.dob = dob;
+		this.userAddress = userAddress;
+		this.company = company;
+		this.picture = picture;
+		this.status = status;
+		this.blockCount = blockCount;
+		this.lastActive = lastActive;
+		
+	}
 
 	public int getUserId() {
 		return userId;

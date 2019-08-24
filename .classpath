@@ -3,5 +3,12 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Java"/>
 	<classpathentry kind="src" path="SocialContact/src"/>
+	<classpathentry kind="lib" path="C:/Users/Fiona/Downloads/jar_files/javax.servlet-api-3.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Fiona/Downloads/javax.servlet.jar/javax.servlet.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_211/db/lib/derby.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_211/db/lib/derbyclient.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_211/db/lib/derbynet.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_211/db/lib/derbyrun.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_211/db/lib/derbytools.jar"/>
 	<classpathentry kind="output" path="SocialContact/build/classes"/>
 </classpath>

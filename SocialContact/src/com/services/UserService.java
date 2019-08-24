@@ -10,6 +10,6 @@ public interface UserService
 {
 	public boolean userLogin(String userName,String password);
 	public User getUser(int userId)throws UserNotFoundException;
-	public boolean chechBirthday(Date dob);
+	public boolean checkBirthday(Date dob);
 	public List<User> showRequests();
 }
