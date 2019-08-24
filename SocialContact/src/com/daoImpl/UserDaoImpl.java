@@ -1,6 +1,7 @@
 package com.daoImpl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.sql.Date;
 
 import com.beans.Address;
 import com.beans.User;
@@ -77,6 +79,7 @@ public class UserDaoImpl implements UserDao {
 		return null;
 		
 	}
+	
 	private Address getAdress(int userId) throws SQLException
 	{
 		String sql="SELECT * FROM USERS_ADDRESS WHERE USER_ID = ?";
@@ -136,9 +139,113 @@ public class UserDaoImpl implements UserDao {
 		preparedStatement_2 = connection.prepareStatement("SELECT * FROM USERS WHERE USER_ID = ?");
 		for(Integer id: friendIds) {
 			friendList.add(getUser(id));
-	}
+		}
 		
 		return friendList;
 	}
+
+
+
+
+	@Override
+	public void addUser(String fullName, String email, long phone, char gender, Date dob, String city, String state,
+			String country, int pincode, String company, String picture, String userName, String password) throws UserNotFoundException, SQLException
+	{
+		if(getUser(email)==null) {
+			preparedStatement = connection.prepareStatement("INSERT INTO USERS(FULL_NAME, EMAIL, PHONE_NUMBER, GENDER, DOB, COMPANY, PROFILE_PICTURE, STATUS, BLOCK_COUNT, LAST_ACTIVE) VALUES(?,?,?,?,?,?,?,?,?,?)");
+			preparedStatement.setString(1, fullName);
+			preparedStatement.setString(2, email);
+			preparedStatement.setLong(3, phone);
+			if(gender=='m'||gender=='M')
+				preparedStatement.setString(4, "M");
+			else
+				preparedStatement.setString(4, "F");
+			preparedStatement.setDate(5, dob);
+			preparedStatement.setString(6, company);
+			preparedStatement.setString(7, picture);
+			preparedStatement.setInt(8, 1);
+			preparedStatement.setInt(9, 0);
+			preparedStatement.setDate(10, new Date(System.currentTimeMillis()));
+			if(preparedStatement.executeUpdate()==1) {
+				preparedStatement_2 = connection.prepareStatement("SELECT USER_ID FROM USERS WHERE EMAIL = ?");
+				preparedStatement_2.setString(1, email);
+				resultSet = preparedStatement_2.executeQuery();
+				if(resultSet.next()) {
+					System.out.println(resultSet.getInt("USER_ID"));
+					preparedStatement = connection.prepareStatement("INSERT INTO USER_CREDENTIALS VALUES(?,?,?)");
+					preparedStatement.setInt(1, resultSet.getInt("USER_ID"));
+					preparedStatement.setString(2, userName);
+					preparedStatement.setString(3, password);
+					preparedStatement.execute();
+					preparedStatement = connection.prepareStatement("INSERT INTO USERS_ADDRESS(CITY, STATE, COUNTRY, PINCODE, USER_ID) VALUES(?,?,?,?,?)");
+					preparedStatement.setString(1, city);
+					preparedStatement.setString(2, state);
+					preparedStatement.setString(3, country);
+					preparedStatement.setLong(4, pincode);
+					preparedStatement.setInt(5, resultSet.getInt("USER_ID"));
+					preparedStatement.execute();
+				}
+			}
+		}
+		
+	}
+
+
+
+
+	@Override
+	public User getUser(String value) throws UserNotFoundException, SQLException {
+		if(value.contains("@") && value.contains(".")) 
+			preparedStatement = connection.prepareStatement("SELECT * FROM USERS WHERE EMAIL = ?");
+		else
+			preparedStatement = connection.prepareStatement("SELECT * FROM USERS WHERE FULL_NAME = ?");
+		preparedStatement.setString(1, value);
+		resultSet_2 = preparedStatement.executeQuery();
+		if(resultSet_2.next())
+		{
+			return new User(resultSet_2.getInt("USER_ID"),
+					resultSet_2.getString("FULL_NAME"), 
+					resultSet_2.getString("EMAIL"), 
+					resultSet_2.getLong("PHONE_NUMBER"),
+					(resultSet_2.getString("GENDER").charAt(0)),
+					resultSet_2.getDate("DOB"),
+					getAdress(resultSet_2.getInt("USER_ID")), 
+					resultSet_2.getString("COMPANY"), 
+					resultSet_2.getString("PROFILE_PICTURE"),
+					resultSet_2.getInt("STATUS"),
+					resultSet_2.getInt("BLOCK_COUNT"),
+					resultSet_2.getDate("LAST_ACTIVE"));
+		}
+		return null;
+	}
+
+
+
+
+	@Override
+	public User getUser(long phone) throws UserNotFoundException, SQLException {
+		preparedStatement = connection.prepareStatement("SELECT * FROM USERS WHERE PHONE_NUMBER = ?");
+		preparedStatement.setLong(1, phone);
+		resultSet_2 = preparedStatement.executeQuery();
+		if(resultSet_2.next())
+		{
+			return new User(resultSet_2.getInt("USER_ID"),
+					resultSet_2.getString("FULL_NAME"), 
+					resultSet_2.getString("EMAIL"), 
+					resultSet_2.getLong("PHONE_NUMBER"),
+					(resultSet_2.getString("GENDER").charAt(0)),
+					resultSet_2.getDate("DOB"),
+					getAdress(resultSet_2.getInt("USER_ID")), 
+					resultSet_2.getString("COMPANY"), 
+					resultSet_2.getString("PROFILE_PICTURE"),
+					resultSet_2.getInt("STATUS"),
+					resultSet_2.getInt("BLOCK_COUNT"),
+					resultSet_2.getDate("LAST_ACTIVE"));
+		}
+		return null;
+	}
+
+
+
 
 }

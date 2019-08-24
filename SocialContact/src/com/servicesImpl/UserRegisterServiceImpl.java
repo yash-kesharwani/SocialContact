@@ -1,0 +1,86 @@
+package com.servicesImpl;
+
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.sql.Date;
+import com.dao.UserDao;
+import com.daoImpl.UserDaoImpl;
+import com.exceptions.UserAlreadyExistsException;
+import com.services.UserRegisterService;
+
+public class UserRegisterServiceImpl implements UserRegisterService {
+
+	UserDao ud=new UserDaoImpl();
+	@Override
+	public int userRegister(String fullName, String email, long phone, char gender, Date dob, String city,
+			String state, String country, int pincode, String company, String picture, String userName,
+			String password)
+	{
+		if(validateAge(dob))
+		{
+			try {
+				if(checkUnique(email, userName, phone))
+				{	
+					ud.addUser(fullName,email,phone,gender,dob,city,state,country,pincode,company,picture,userName,password);
+					return 0;
+				}
+				
+			} catch (UserAlreadyExistsException e)
+			{
+				
+				e.printStackTrace();
+				return 1;
+			}
+		}
+		else
+			return 2;
+	}
+
+	@Override
+	public boolean validateAge(Date dob) 
+	{
+		LocalDate now=LocalDate.now();
+		LocalDate birthDate=dob.toLocalDate();
+		if ((birthDate != null) && (now != null))
+		{
+            int age= Period.between(birthDate, now).getYears();
+            if(age>=18)return true;
+        } else {
+            return false;
+        }
+		
+		return false;
+	}
+
+	@Override
+	public boolean checkUnique(String email, String userName, long phone) throws UserAlreadyExistsException {
+		if(ud.getUser(email)!=null && ud.getUser(userName)!=null && ud.getUser(phone)!=null)
+		return false;
+		return true;
+	}
+
+	@Override
+	public boolean checkDisable(int status) {
+		if(status==1)
+			return true;
+		return false;
+	}
+
+	@Override
+	public boolean userRegister(String fullName, String email, long phone, char gender, java.util.Date dob, String city,
+			String state, String country, int pincode, String company, String picture, String userName,
+			String password) {
+		// TODO Auto-generated method stub
+		
+		return false;
+	}
+
+	@Override
+	public boolean validateAge(java.util.Date dob) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

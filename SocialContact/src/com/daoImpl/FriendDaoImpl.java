@@ -56,10 +56,21 @@ public class FriendDaoImpl implements FriendDao {
 		List<User> friendList = new ArrayList<User>();
 		preparedStatement.setInt(1, userId);
 		preparedStatement.setInt(2, 1);
+		
 		resultSet = preparedStatement.executeQuery();
 		while(resultSet.next()) {
 			friendIds.add(resultSet.getInt("FRIEND_ID"));
 		}
+		
+		preparedStatement = connection.prepareStatement("SELECT USER_ID FROM FRIENDSHIP WHERE FRIEND_ID = ? AND STATUS = ?");
+		preparedStatement.setInt(1, userId);
+		preparedStatement.setInt(2, 1);
+		resultSet = preparedStatement.executeQuery();
+		while(resultSet.next()) {
+			friendIds.add(resultSet.getInt("USER_ID"));
+		}
+		
+		
 		for(Integer id: friendIds) {
 			preparedStatement_2.setInt(1, id);
 			resultSet_2 = preparedStatement_2.executeQuery();
@@ -102,6 +113,23 @@ public class FriendDaoImpl implements FriendDao {
 					resultSet_2.getDate("DOB"),getAdress(resultSet.getInt("FRIEND_ID")), resultSet_2.getString("COMPANY"), resultSet_2.getString("PROFILE_PICTURE"),resultSet_2.getInt("STATUS"),
 					resultSet_2.getInt("BLOCK_COUNT"), resultSet_2.getDate("LAST_ACTIVE"));
 		}
+		
+		preparedStatement = connection.prepareStatement("SELECT * FROM FRIENDSHIP WHERE FRIEND_ID = ? AND USER_ID = ?");
+		preparedStatement.setInt(1, userId);
+		preparedStatement.setInt(2, friendId);
+		resultSet = preparedStatement.executeQuery();
+		if(resultSet.next()) {
+			preparedStatement_2.setInt(1, resultSet.getInt("FRIEND_ID"));
+			resultSet_2 = preparedStatement_2.executeQuery();
+			if(resultSet_2.next())
+				return new User(resultSet_2.getInt("USER_ID"),resultSet_2.getString("FULL_NAME"), resultSet_2.getString("EMAIL"), 
+					resultSet_2.getLong("PHONE_NUMBER"),(resultSet_2.getString("GENDER").charAt(0)),
+					resultSet_2.getDate("DOB"),getAdress(resultSet.getInt("FRIEND_ID")), resultSet_2.getString("COMPANY"), resultSet_2.getString("PROFILE_PICTURE"),resultSet_2.getInt("STATUS"),
+					resultSet_2.getInt("BLOCK_COUNT"), resultSet_2.getDate("LAST_ACTIVE"));
+		}
+		
+		
+		
 		return null;
 	}
 
@@ -113,9 +141,8 @@ public class FriendDaoImpl implements FriendDao {
 		resultSet_2 = preparedStatement.executeQuery();
 		if(resultSet_2.next()) 
 		{
-			//int userId = resultSet.getInt("USER_ID");
 			return new User(resultSet_2.getInt("USER_ID"),resultSet_2.getString("FULL_NAME"), resultSet_2.getString("EMAIL"),resultSet_2.getLong("PHONE_NUMBER"),(resultSet_2.getString("GENDER").charAt(0)),resultSet_2.getDate("DOB"),getAdress(resultSet_2.getInt("USER_ID")), resultSet_2.getString(7), resultSet_2.getString("PROFILE_PICTURE"),resultSet_2.getInt("STATUS"),resultSet_2.getInt("BLOCK_COUNT"), resultSet_2.getDate("LAST_ACTIVE"));
-		
+	
 		}
 		return null;
 	}
@@ -136,48 +163,103 @@ public class FriendDaoImpl implements FriendDao {
 
 	@Override
 	public boolean acceptFriendRequest(int userId,int friendId)throws SQLException {
-		preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
-		preparedStatement.setInt(1, 1);
-		preparedStatement.setInt(2, userId);
-		preparedStatement.setInt(3, friendId);
-		int status=preparedStatement.executeUpdate();
-		if(status==1)
-			return true;
+		if(checkRequested(userId, friendId)) {
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, 1);
+			preparedStatement.setInt(2, userId);
+			preparedStatement.setInt(3, friendId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
+		else if(checkRequested(friendId, userId)) {
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE FRIEND_ID=? AND USER_ID=?");
+			preparedStatement.setInt(1, 1);
+			preparedStatement.setInt(2, userId);
+			preparedStatement.setInt(3, friendId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean blockFriend(int userId,int friendId)throws SQLException {
-		preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
-		preparedStatement.setInt(1, 2);
-		preparedStatement.setInt(2, userId);
-		preparedStatement.setInt(3, friendId);
-		int status=preparedStatement.executeUpdate();
-		if(status==1)
-			return true;
+		if(checkUnBlocked(userId, friendId)) {
+			System.out.println("Inside if");
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, 2);
+			preparedStatement.setInt(2, userId);
+			preparedStatement.setInt(3, friendId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
+		else if(checkUnBlocked(friendId, userId)) {
+			System.out.println("Inside else");
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, 2);
+			preparedStatement.setInt(2, friendId);
+			preparedStatement.setInt(3, userId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean unblockFriend(int userId,int friendId)throws SQLException {
-		preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
-		preparedStatement.setInt(1, 1);
-		preparedStatement.setInt(2, userId);
-		preparedStatement.setInt(3, friendId);
-		int status=preparedStatement.executeUpdate();
-		if(status==1)
-			return true;
+		if(checkBlocked(userId, friendId)) {
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, 1);
+			preparedStatement.setInt(2, userId);
+			preparedStatement.setInt(3, friendId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}else if(checkBlocked(friendId, userId)) {
+			preparedStatement=connection.prepareStatement("UPDATE FRIENDSHIP SET STATUS=? WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, 1);
+			preparedStatement.setInt(2, friendId);
+			preparedStatement.setInt(3, userId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
 		return false;
 	}
 
 	@Override
-	public boolean deleteFriend(int userId,int friendId)throws SQLException {
-		preparedStatement=connection.prepareStatement("DELETE FROM FRIENDSHIP WHERE USER_ID=? AND FRIEND_ID=?");
+	public boolean isFriend(int userId, int friendId) throws SQLException{
+		preparedStatement=connection.prepareStatement("SELECT STATUS FROM FRIENDSHIP WHERE USER_ID=? AND FRIEND_ID=?");
 		preparedStatement.setInt(1, userId);
 		preparedStatement.setInt(2, friendId);
-		int status=preparedStatement.executeUpdate();
-		if(status==1)
-			return true;
+		resultSet=preparedStatement.executeQuery();
+		if(resultSet.next()) {
+			if(resultSet.getInt("STATUS")==1)
+				return true;
+		}
+		return false;
+	}
+	@Override
+	public boolean deleteFriend(int userId,int friendId)throws SQLException {
+		if(isFriend(userId, friendId)) {
+			preparedStatement=connection.prepareStatement("DELETE FROM FRIENDSHIP WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, userId);
+			preparedStatement.setInt(2, friendId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}else if(isFriend(friendId, userId)) {
+			preparedStatement=connection.prepareStatement("DELETE FROM FRIENDSHIP WHERE USER_ID=? AND FRIEND_ID=?");
+			preparedStatement.setInt(1, friendId);
+			preparedStatement.setInt(2, userId);
+			int status=preparedStatement.executeUpdate();
+			if(status==1)
+				return true;
+		}
 		return false;
 	}
 
@@ -192,6 +274,13 @@ public class FriendDaoImpl implements FriendDao {
 		resultSet = preparedStatement.executeQuery();
 		while(resultSet.next()) {
 			friendIds.add(resultSet.getInt("FRIEND_ID"));
+		}
+		preparedStatement = connection.prepareStatement("SELECT USER_ID FROM FRIENDSHIP WHERE FRIEND_ID=? AND STATUS = ?");
+		preparedStatement.setInt(1, userId);
+		preparedStatement.setInt(2, 2);
+		resultSet = preparedStatement.executeQuery();
+		while(resultSet.next()) {
+			friendIds.add(resultSet.getInt("USER_ID"));
 		}
 		for(Integer id: friendIds) {
 			preparedStatement_2.setInt(1, id);
@@ -210,11 +299,28 @@ public class FriendDaoImpl implements FriendDao {
 		preparedStatement.setInt(1, userId);
 		preparedStatement.setInt(2, friendId);
 		resultSet=preparedStatement.executeQuery();
-		if(resultSet.next())
+		if(resultSet.next()) {
 			if(resultSet.getInt("STATUS")==2)
 				return true;
+		}
+		
 		return false;
 	}
+	
+	@Override
+	public boolean checkUnBlocked(int userId,int friendId)throws SQLException {
+		preparedStatement=connection.prepareStatement("SELECT STATUS FROM FRIENDSHIP WHERE USER_ID=? AND FRIEND_ID=?");
+		preparedStatement.setInt(1, userId);
+		preparedStatement.setInt(2, friendId);
+		resultSet=preparedStatement.executeQuery();
+		if(resultSet.next()) {
+			if(resultSet.getInt("STATUS")!=2)
+				return true;
+		}
+		
+		return false;
+	}
+
 
 	@Override
 	public boolean checkRequested(int userId,int friendId)throws SQLException {

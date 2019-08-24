@@ -33,5 +33,9 @@ public interface FriendDao {
 	boolean checkBlocked(int userId, int friendId) throws SQLException;
 
 	boolean checkRequested(int userId, int friendId) throws SQLException;
+
+	boolean checkUnBlocked(int userId, int friendId) throws SQLException;
+
+	boolean isFriend(int userId, int friendId) throws SQLException;
 	
 }
