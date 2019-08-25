@@ -164,7 +164,7 @@ public class UserDaoImpl implements UserDao {
 			preparedStatement.setString(6, company);
 			preparedStatement.setString(7, picture);
 			preparedStatement.setInt(8, 1);
-			preparedStatement.setInt(9, 0);
+			preparedStatement.setInt(9, 5);
 			preparedStatement.setDate(10, new Date(System.currentTimeMillis()));
 			if(preparedStatement.executeUpdate()==1) {
 				preparedStatement_2 = connection.prepareStatement("SELECT USER_ID FROM USERS WHERE EMAIL = ?");

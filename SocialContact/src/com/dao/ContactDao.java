@@ -15,5 +15,6 @@ public interface ContactDao
 	public List<Contact> searchContact(String fullName, String email, long phone) throws SQLException;
 	public boolean updateContact(Contact c) throws SQLException;
 	public boolean deleteContact(int cId) throws SQLException;
+	public boolean updateAddress(int aId, String city, String state,String country, int pincode)throws SQLException;
 	
 }

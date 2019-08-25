@@ -5,9 +5,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.sql.Date;
+import java.sql.SQLException;
+
 import com.dao.UserDao;
 import com.daoImpl.UserDaoImpl;
 import com.exceptions.UserAlreadyExistsException;
+import com.exceptions.UserNotFoundException;
 import com.services.UserRegisterService;
 
 public class UserRegisterServiceImpl implements UserRegisterService {
@@ -16,7 +19,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 	@Override
 	public int userRegister(String fullName, String email, long phone, char gender, Date dob, String city,
 			String state, String country, int pincode, String company, String picture, String userName,
-			String password)
+			String password) throws UserNotFoundException, SQLException
 	{
 		if(validateAge(dob))
 		{
@@ -36,6 +39,8 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 		}
 		else
 			return 2;
+		return 0;
+		
 	}
 
 	@Override
@@ -55,7 +60,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 	}
 
 	@Override
-	public boolean checkUnique(String email, String userName, long phone) throws UserAlreadyExistsException {
+	public boolean checkUnique(String email, String userName, long phone) throws UserAlreadyExistsException, UserNotFoundException, SQLException {
 		if(ud.getUser(email)!=null && ud.getUser(userName)!=null && ud.getUser(phone)!=null)
 		return false;
 		return true;
@@ -69,12 +74,12 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 	}
 
 	@Override
-	public boolean userRegister(String fullName, String email, long phone, char gender, java.util.Date dob, String city,
+	public int userRegister(String fullName, String email, long phone, char gender, java.util.Date dob, String city,
 			String state, String country, int pincode, String company, String picture, String userName,
 			String password) {
 		// TODO Auto-generated method stub
 		
-		return false;
+		return 0;
 	}
 
 	@Override
